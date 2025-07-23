@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Storage Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen font-sans">
+    <!-- Space Overlay for additional effects -->
+    <div class="space-overlay"></div>
+    
+    <!-- Corner Logo -->
+    <div class="logo-corner" title="Made by Star AI Lab">
+        <!-- Your actual logo -->
+        <img src="./_Pngtree_n_circle_letter_initial_logo_4835121-removebg-preview.png" 
+             alt="Star AI Lab Logo" 
+             class="logo-image"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <!-- Fallback logo if image fails to load -->
+        
+        <span class="logo-text">Made by Star AI Lab</span>
+    </div>
+    
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle" style="left: 5%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 15%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 25%; animation-delay: 6s;"></div>
+        <div class="particle" style="left: 35%; animation-delay: 9s;"></div>
+        <div class="particle" style="left: 45%; animation-delay: 12s;"></div>
+        <div class="particle" style="left: 55%; animation-delay: 15s;"></div>
+        <div class="particle" style="left: 65%; animation-delay: 18s;"></div>
+        <div class="particle" style="left: 75%; animation-delay: 21s;"></div>
+        <div class="particle" style="left: 85%; animation-delay: 24s;"></div>
+        <div class="particle" style="left: 95%; animation-delay: 27s;"></div>
+        <div class="particle" style="left: 10%; animation-delay: 30s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 33s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 36s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 39s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 42s;"></div>
+    </div>
+
+    <!-- Global Drag Overlay -->
+    <div id="dragOverlay" class="drag-overlay">
+        <div class="drag-message">
+            <i class="fas fa-cloud-upload-alt text-5xl text-yellow-400 mb-6"></i>
+            <h3 class="text-2xl font-bold text-white mb-3">Drop Images Here</h3>
+            <p class="text-blue-300 text-lg">Release to upload your images</p>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-12">
+        <header class="mb-16 text-center">
+            <div class="inline-block px-12 py-8 rounded-3xl gradient-header shadow-xl fade-in relative">
+                <h1 class="text-5xl md:text-6xl font-extrabold text-white tracking-tight mb-3 drop-shadow relative z-10">
+                    <span class="text-yellow-400">Media Storage</span> 
+                    <span class="text-blue-400"></span> 
+                    <span class="text-white">Manager</span>
+                </h1>
+                <p class="text-blue-200 text-xl font-medium relative z-10">Store and organize your images and links for easy access</p>
+            </div>
+        </header>
+        
+        <div class="flex justify-center mb-16">
+            <button id="openModalBtn" class="btn-accent font-bold py-4 px-12 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center gap-3 text-xl fade-in relative z-10">
+                <i class="fas fa-plus-circle text-2xl"></i> Add New Media
+            </button>
+        </div>
+        
+        <div class="glass-premium rounded-3xl shadow-2xl p-10 mb-16 fade-in slide-in">
+            <div class="flex flex-col md:flex-row items-center mb-10">
+                <div class="relative w-full md:w-3/4 mb-6 md:mb-0 md:mr-6">
+                    <input type="text" id="searchInput" placeholder="Search by title, tags or content..." class="input-premium w-full px-8 py-4 rounded-2xl focus:outline-none shadow transition text-lg">
+                    <i class="fas fa-search absolute right-8 top-5 text-blue-400 text-xl"></i>
+                </div>
+                <button id="searchBtn" class="btn-premium w-full md:w-auto font-bold py-4 px-12 rounded-2xl transition-colors duration-300 whitespace-nowrap shadow-lg text-xl">
+                    Search Media
+                </button>
+            </div>
+            <div id="searchResults" class="search-results hidden mt-12 space-y-8">
+                <!-- Search results will appear here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal -->
+    <div id="mediaModal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50 hidden">
+        <div class="glass-premium rounded-3xl modal-shadow w-full max-w-4xl max-h-[90vh] overflow-hidden fade-in slide-in">
+            <div class="flex justify-between items-center border-b border-blue-800 p-10 bg-gradient-to-r from-gray-900 via-blue-900 to-black">
+                <h3 class="text-3xl font-bold text-white">Add New <span class="text-yellow-400">Media</span></h3>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-yellow-400 transition-colors">
+                    <i class="fas fa-times text-3xl"></i>
+                </button>
+            </div>
+            <div class="p-12 overflow-y-auto" style="max-height: calc(90vh - 140px)">
+                <div class="mb-10">
+                    <label for="mediaTitle" class="block text-lg font-semibold text-blue-300 mb-2">Title</label>
+                    <input type="text" id="mediaTitle" placeholder="Give your media a descriptive title" class="input-premium w-full px-6 py-3 rounded-xl focus:outline-none shadow-sm text-lg">
+                </div>
+                <div class="mb-10">
+                    <label for="mediaTags" class="block text-lg font-semibold text-blue-300 mb-2">Tags (comma separated)</label>
+                    <input type="text" id="mediaTags" placeholder="e.g. design, inspiration, marketing" class="input-premium w-full px-6 py-3 rounded-xl focus:outline-none shadow-sm text-lg">
+                </div>
+                <div class="mb-10">
+                    <label class="block text-lg font-semibold text-blue-300 mb-3">Media Type</label>
+                    <div class="flex space-x-6">
+                        <button id="imageTab" class="media-type-tab px-8 py-3 rounded-xl font-semibold btn-accent shadow-md text-lg">Images</button>
+                        <button id="linkTab" class="media-type-tab px-8 py-3 rounded-xl font-semibold btn-premium shadow text-lg">Links</button>
+                    </div>
+                </div>
+                <!-- Image Upload Section -->
+                <div id="imageSection" class="space-y-6">
+                    <div id="dropZone" class="drop-zone rounded-xl p-12 text-center cursor-pointer">
+                        <input type="file" id="imageUpload" accept="image/*" multiple class="hidden">
+                        <div class="drop-content">
+                            <i class="upload-icon fas fa-cloud-upload-alt text-6xl text-blue-400 mb-6 block"></i>
+                            <h4 class="text-2xl font-semibold text-blue-300 mb-3">Drop images here or click to browse</h4>
+                            <p class="text-gray-400 mb-3 text-lg">Supports PNG, JPG, GIF up to 5MB each</p>
+                            <p class="text-base text-gray-500">You can select multiple files at once</p>
+                        </div>
+                    </div>
+                    <div id="imagePreviews" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                        <!-- Image previews will appear here -->
+                    </div>
+                </div>
+                <!-- Link Section -->
+                <div id="linkSection" class="hidden space-y-6">
+                    <div class="flex items-center">
+                        <input type="text" id="linkUrl" placeholder="Paste URL here (e.g. https://example.com)" class="input-premium flex-grow px-6 py-3 rounded-l-xl focus:outline-none shadow-sm text-lg">
+                        <button id="addLinkBtn" class="btn-premium px-6 py-3 rounded-r-xl font-semibold shadow text-lg">Add</button>
+                    </div>
+                    <div id="linkList" class="space-y-3">
+                        <!-- Links will appear here -->
+                    </div>
+                </div>
+                <div class="mt-10">
+                    <label for="mediaNotes" class="block text-lg font-semibold text-blue-300 mb-2">Notes</label>
+                    <textarea id="mediaNotes" rows="4" placeholder="Add any additional notes about this media..." class="input-premium w-full px-6 py-3 rounded-xl focus:outline-none shadow-sm text-lg"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-4 border-t border-blue-800 p-10 bg-gradient-to-r from-gray-900 via-blue-900 to-black">
+                <button id="cancelBtn" class="px-8 py-3 border-2 border-gray-600 rounded-xl text-gray-300 hover:bg-gray-800 hover:border-blue-500 font-semibold transition-colors text-lg">Cancel</button>
+                <button id="saveBtn" class="btn-accent px-12 py-3 rounded-xl font-bold shadow text-lg">Save Media</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lightbox Modal -->
+    <div id="lightboxModal" class="fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 hidden">
+        <div class="relative glass-light rounded-2xl shadow-2xl p-8 max-w-2xl w-full flex flex-col items-center">
+            <img id="lightboxImage" src="" alt="Preview" class="max-h-[70vh] rounded-xl mb-6" />
+            <button id="closeLightboxBtn" class="absolute top-3 right-3 text-gray-400 hover:text-yellow-400 text-3xl transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+            <button id="copyImageBtn" class="btn-premium mt-3 px-6 py-3 rounded-xl font-semibold shadow text-lg">Copy Image URL</button>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50 hidden">
+        <div class="glass-light rounded-2xl shadow-2xl p-8 max-w-md w-full">
+            <div class="text-center">
+                <i class="fas fa-exclamation-triangle text-red-500 text-5xl mb-6"></i>
+                <h3 class="text-2xl font-bold text-white mb-3">Delete Media</h3>
+                <p class="text-blue-200 mb-8 text-lg">Are you sure you want to delete this media? This action cannot be undone.</p>
+                <div class="flex space-x-4 justify-center">
+                    <button id="cancelDeleteBtn" class="px-8 py-3 border-2 border-gray-600 rounded-xl text-gray-300 hover:bg-gray-800 hover:border-blue-500 font-semibold transition-colors text-lg">Cancel</button>
+                    <button id="confirmDeleteBtn" class="px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold shadow-lg text-lg">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast-premium fixed bottom-10 left-1/2 transform -translate-x-1/2 text-white px-8 py-4 rounded-xl shadow-lg z-50 hidden text-lg"></div>
+    
+    <script>
+        
+        // DOM Elements
+        const openModalBtn = document.getElementById('openModalBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const mediaModal = document.getElementById('mediaModal');
+        const imageTab = document.getElementById('imageTab');
+        const linkTab = document.getElementById('linkTab');
+        const imageSection = document.getElementById('imageSection');
+        const linkSection = document.getElementById('linkSection');
+        const imageUpload = document.getElementById('imageUpload');
+        const imagePreviews = document.getElementById('imagePreviews');
+        const linkUrl = document.getElementById('linkUrl');
+        const addLinkBtn = document.getElementById('addLinkBtn');
+        const linkList = document.getElementById('linkList');
+        const saveBtn = document.getElementById('saveBtn');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const searchResults = document.getElementById('searchResults');
+        const deleteModal = document.getElementById('deleteModal');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const dropZone = document.getElementById('dropZone');
+        const dragOverlay = document.getElementById('dragOverlay');
+        
+        // State
+        let mediaType = 'image'; // 'image' or 'link'
+        let uploadedImages = [];
+        let addedLinks = [];
+        let allMedia = JSON.parse(localStorage.getItem('mediaStorage')) || [];
+        let itemToDelete = null;
+        let dragCounter = 0;
+        
+        // Event Listeners
+        openModalBtn.addEventListener('click', openModal);
+        closeModalBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        imageTab.addEventListener('click', () => switchTab('image'));
+        linkTab.addEventListener('click', () => switchTab('link'));
+        imageUpload.addEventListener('change', handleImageUpload);
+        addLinkBtn.addEventListener('click', addLink);
+        saveBtn.addEventListener('click', saveMedia);
+        searchBtn.addEventListener('click', searchMedia);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchMedia();
+        });
+        cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+        confirmDeleteBtn.addEventListener('click', confirmDelete);
+        
+        // Enhanced Drag & Drop Event Listeners
+        dropZone.addEventListener('click', () => imageUpload.click());
+        
+        // Global drag events for the overlay
+        document.addEventListener('dragenter', handleGlobalDragEnter);
+        document.addEventListener('dragleave', handleGlobalDragLeave);
+        document.addEventListener('dragover', handleGlobalDragOver);
+        document.addEventListener('drop', handleGlobalDrop);
+        
+        // Drop zone specific events
+        dropZone.addEventListener('dragenter', handleDragEnter);
+        dropZone.addEventListener('dragleave', handleDragLeave);
+        dropZone.addEventListener('dragover', handleDragOver);
+        dropZone.addEventListener('drop', handleDrop);
+        
+        // Functions
+        function openModal() {
+            mediaModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            resetForm();
+        }
+        
+        function closeModal() {
+            mediaModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+        
+        function openDeleteModal(itemId) {
+            itemToDelete = itemId;
+            deleteModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeDeleteModal() {
+            deleteModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            itemToDelete = null;
+        }
+        
+        function confirmDelete() {
+            if (itemToDelete !== null) {
+                // Remove item from allMedia array
+                allMedia = allMedia.filter(item => item.id !== itemToDelete);
+                
+                // Update localStorage
+                localStorage.setItem('mediaStorage', JSON.stringify(allMedia));
+                
+                // Show success message
+                showToast('Media deleted successfully!');
+                
+                // Refresh search results if there's an active search
+                const query = searchInput.value.trim();
+                if (query) {
+                    searchMedia();
+                } else {
+                    searchResults.classList.add('hidden');
+                }
+                
+                closeDeleteModal();
+            }
+        }
+        
+        // Enhanced Drag & Drop Functions
+        function handleGlobalDragEnter(e) {
+            e.preventDefault();
+            dragCounter++;
+            if (dragCounter === 1) {
+                dragOverlay.classList.add('active');
+            }
+        }
+        
+        function handleGlobalDragLeave(e) {
+            e.preventDefault();
+            dragCounter--;
+            if (dragCounter === 0) {
+                dragOverlay.classList.remove('active');
+            }
+        }
+        
+        function handleGlobalDragOver(e) {
+            e.preventDefault();
+        }
+        
+        function handleGlobalDrop(e) {
+            e.preventDefault();
+            dragCounter = 0;
+            dragOverlay.classList.remove('active');
+            
+            // If modal is open and we're on image tab, handle the drop
+            if (!mediaModal.classList.contains('hidden') && mediaType === 'image') {
+                const files = e.dataTransfer.files;
+                processFiles(files);
+            }
+        }
+        
+        function handleDragEnter(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.add('drag-over');
+        }
+        
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove('drag-over');
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            processFiles(files);
+        }
+        
+        function processFiles(files) {
+            const imageFiles = Array.from(files).filter(file => file.type.match('image.*'));
+            
+            if (imageFiles.length === 0) {
+                showToast('Please drop only image files (PNG, JPG, GIF)');
+                return;
+            }
+            
+            if (imageFiles.length > 10) {
+                showToast('Maximum 10 images allowed at once');
+                return;
+            }
+            
+            imageFiles.forEach(file => {
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    showToast(`${file.name} is too large. Maximum size is 5MB`);
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const imageData = {
+                        name: file.name,
+                        size: formatFileSize(file.size),
+                        dataUrl: event.target.result
+                    };
+                    
+                    uploadedImages.push(imageData);
+                    renderImagePreviews();
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            showToast(`Processing ${imageFiles.length} image${imageFiles.length > 1 ? 's' : ''}...`);
+        }
+        
+        function switchTab(type) {
+            mediaType = type;
+            
+            if (type === 'image') {
+                imageTab.classList.remove('btn-premium');
+                imageTab.classList.add('btn-accent');
+                linkTab.classList.remove('btn-accent');
+                linkTab.classList.add('btn-premium');
+                imageSection.classList.remove('hidden');
+                linkSection.classList.add('hidden');
+            } else {
+                linkTab.classList.remove('btn-premium');
+                linkTab.classList.add('btn-accent');
+                imageTab.classList.remove('btn-accent');
+                imageTab.classList.add('btn-premium');
+                linkSection.classList.remove('hidden');
+                imageSection.classList.add('hidden');
+            }
+        }
+        
+        function handleImageUpload(e) {
+            const files = e.target.files;
+            processFiles(files);
+        }
+        
+        function renderImagePreviews() {
+            imagePreviews.innerHTML = '';
+            
+            uploadedImages.forEach((image, index) => {
+                const preview = document.createElement('div');
+                preview.className = 'preview-image relative group glass-light rounded-xl overflow-hidden shadow-md';
+                
+                preview.innerHTML = `
+                    <img src="${image.dataUrl}" alt="${image.name}" class="w-full h-36 object-cover">
+                    <div class="p-4">
+                        <p class="text-sm font-medium text-blue-300 truncate">${image.name}</p>
+                        <p class="text-sm text-yellow-400">${image.size}</p>
+                    </div>
+                    <button class="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg" data-index="${index}">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                `;
+                
+                imagePreviews.appendChild(preview);
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('#imagePreviews button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.getAttribute('data-index'));
+                    uploadedImages.splice(index, 1);
+                    renderImagePreviews();
+                    showToast('Image removed');
+                });
+            });
+        }
+        
+        function addLink() {
+            const url = linkUrl.value.trim();
+            
+            if (!url) return;
+            
+            if (!isValidUrl(url)) {
+                showToast('Please enter a valid URL (e.g. https://example.com)');
+                return;
+            }
+            
+            addedLinks.push(url);
+            renderLinkList();
+            linkUrl.value = '';
+            showToast('Link added successfully');
+        }
+        
+        function renderLinkList() {
+            linkList.innerHTML = '';
+            
+            addedLinks.forEach((link, index) => {
+                const linkItem = document.createElement('div');
+                linkItem.className = 'flex items-center justify-between card-premium p-4 rounded-xl';
+                
+                linkItem.innerHTML = `
+                    <div class="flex items-center truncate">
+                        <i class="fas fa-link text-blue-400 mr-3 text-lg"></i>
+                        <a href="${link}" target="_blank" class="text-blue-300 hover:text-yellow-400 hover:underline truncate transition-colors text-lg">${link}</a>
+                    </div>
+                    <button class="text-red-500 hover:text-red-400 transition-colors text-lg" data-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                linkList.appendChild(linkItem);
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('#linkList button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.getAttribute('data-index'));
+                    addedLinks.splice(index, 1);
+                    renderLinkList();
+                    showToast('Link removed');
+                });
+            });
+        }
+        
+        function saveMedia() {
+            const title = document.getElementById('mediaTitle').value.trim();
+            const tags = document.getElementById('mediaTags').value.trim();
+            const notes = document.getElementById('mediaNotes').value.trim();
+            
+            if (!title) {
+                showToast('Please enter a title for your media');
+                return;
+            }
+            
+            if (mediaType === 'image' && uploadedImages.length === 0) {
+                showToast('Please upload at least one image');
+                return;
+            }
+            
+            if (mediaType === 'link' && addedLinks.length === 0) {
+                showToast('Please add at least one link');
+                return;
+            }
+            
+            const mediaItem = {
+                id: Date.now(),
+                type: mediaType,
+                title,
+                tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
+                notes,
+                date: new Date().toISOString(),
+                content: mediaType === 'image' ? uploadedImages : addedLinks
+            };
+            
+            allMedia.unshift(mediaItem); // Add to beginning of array
+            localStorage.setItem('mediaStorage', JSON.stringify(allMedia));
+            
+            showToast('Media saved successfully!');
+            closeModal();
+            resetForm();
+        }
+        
+        function searchMedia() {
+            const query = searchInput.value.trim().toLowerCase();
+            
+            if (!query) {
+                searchResults.classList.add('hidden');
+                return;
+            }
+            
+            const results = allMedia.filter(item => {
+                // Search in title
+                if (item.title.toLowerCase().includes(query)) return true;
+                
+                // Search in tags
+                if (item.tags.some(tag => tag.toLowerCase().includes(query))) return true;
+                
+                // Search in notes
+                if (item.notes.toLowerCase().includes(query)) return true;
+                
+                // Search in links (for link items)
+                if (item.type === 'link') {
+                    return item.content.some(link => link.toLowerCase().includes(query));
+                }
+                
+                return false;
+            });
+            
+            renderSearchResults(results);
+        }
+        
+        function renderSearchResults(results) {
+            searchResults.innerHTML = '';
+
+            if (results.length === 0) {
+                searchResults.innerHTML = `
+                    <div class="text-center py-12 text-blue-400">
+                        <i class="fas fa-search fa-3x mb-4"></i>
+                        <p class="text-xl">No results found for your search</p>
+                    </div>
+                `;
+            } else {
+                results.forEach((item, idx) => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'result-card rounded-xl p-6 transition-colors duration-200 select-text relative';
+
+                    // Format date
+                    const date = new Date(item.date);
+                    const formattedDate = date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    // Create content preview based on type
+                    let contentPreview = '';
+
+                    if (item.type === 'image') {
+                        const firstImage = item.content[0];
+                        contentPreview = `
+                            <div class="flex items-center space-x-3 mt-4">
+                                <span class="tag-blue text-sm px-3 py-2 rounded-full">
+                                    <i class="fas fa-image mr-2"></i> ${item.content.length} image${item.content.length > 1 ? 's' : ''}
+                                </span>
+                                <img src="${firstImage.dataUrl}" alt="Preview" class="w-20 h-20 object-cover rounded-lg cursor-pointer border-2 border-blue-600 hover:border-yellow-400 transition" data-img="${firstImage.dataUrl}" data-idx="${idx}">
+                                <button class="ml-3 btn-premium px-4 py-2 rounded text-sm font-semibold copy-image-btn" data-img="${firstImage.dataUrl}"><i class="fas fa-copy mr-1"></i> Copy</button>
+                            </div>
+                        `;
+                    } else {
+                        const firstLink = item.content[0];
+                        contentPreview = `
+                            <div class="mt-4 flex items-center gap-3">
+                                <span class="tag-yellow text-sm px-3 py-2 rounded-full">
+                                    <i class="fas fa-link mr-2"></i> ${item.content.length} link${item.content.length > 1 ? 's' : ''}
+                                </span>
+                                <a href="${firstLink}" target="_blank" class="block text-blue-300 hover:text-yellow-400 hover:underline text-base mt-1 truncate max-w-xs transition-colors">${firstLink}</a>
+                                <button class="ml-3 btn-premium px-4 py-2 rounded text-sm font-semibold copy-link-btn" data-link="${firstLink}"><i class="fas fa-copy mr-1"></i> Copy</button>
+                            </div>
+                        `;
+                    }
+
+                    // Tags display
+                    let tagsDisplay = '';
+                    if (item.tags.length > 0) {
+                        tagsDisplay = `
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                ${item.tags.map((tag, i) => `<span class="${i % 2 === 0 ? 'tag-blue' : 'tag-yellow'} text-sm px-3 py-1 rounded-full">${tag}</span>`).join('')}
+                            </div>
+                        `;
+                    }
+
+                    resultItem.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-bold text-2xl text-white">${item.title}</h4>
+                            <div class="flex items-center space-x-3">
+                                <span class="text-sm text-blue-400">${formattedDate}</span>
+                                <button class="delete-btn bg-red-500 hover:bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center transition-all duration-200" data-id="${item.id}" title="Delete this media">
+                                    <i class="fas fa-trash text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                        ${item.notes ? `<p class="text-blue-200 text-base mt-2">${item.notes}</p>` : ''}
+                        ${tagsDisplay}
+                        ${contentPreview}
+                    `;
+
+                    searchResults.appendChild(resultItem);
+                });
+
+                // Add event listeners
+                document.querySelectorAll('.copy-link-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const link = e.currentTarget.getAttribute('data-link');
+                        copyToClipboard(link, 'Link copied!');
+                    });
+                });
+                document.querySelectorAll('.copy-image-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const img = e.currentTarget.getAttribute('data-img');
+                        copyToClipboard(img, 'Image URL copied!');
+                    });
+                });
+                document.querySelectorAll('img[data-img]').forEach(img => {
+                    img.addEventListener('click', (e) => {
+                        openLightbox(e.currentTarget.getAttribute('data-img'));
+                    });
+                });
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const itemId = parseInt(e.currentTarget.getAttribute('data-id'));
+                        openDeleteModal(itemId);
+                    });
+                });
+            }
+
+            searchResults.classList.remove('hidden');
+        }
+        
+        function resetForm() {
+            document.getElementById('mediaTitle').value = '';
+            document.getElementById('mediaTags').value = '';
+            document.getElementById('mediaNotes').value = '';
+            uploadedImages = [];
+            addedLinks = [];
+            imagePreviews.innerHTML = '';
+            linkList.innerHTML = '';
+            linkUrl.value = '';
+            switchTab('image');
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+        
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function copyToClipboard(text, message) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(message);
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Lightbox for image preview
+        function openLightbox(imgUrl) {
+            const modal = document.getElementById('lightboxModal');
+            const img = document.getElementById('lightboxImage');
+            img.src = imgUrl;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            // Copy button in modal
+            document.getElementById('copyImageBtn').onclick = () => copyToClipboard(imgUrl, 'Image URL copied!');
+        }
+        document.getElementById('closeLightboxBtn').onclick = function() {
+            document.getElementById('lightboxModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        };
+        
+        // Initialize
+        switchTab('image');
+
+
+
+    </script>
+</body>
+</html>
